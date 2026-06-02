@@ -1,0 +1,399 @@
+
+<div class="cinema-intro" id="cinemaIntro">
+  <div class="cinema-text">龙哥，<br><br>你还记得自己小时候吗？</div>
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0d0d0f;color:#e8e0d0;font-family:'Noto Sans SC',sans-serif;min-height:100vh;overflow-x:hidden;}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.4;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");}
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;opacity:0;animation:particleDrift linear infinite;}
+@keyframes particleDrift{0%{opacity:0;transform:translateY(0) scale(0.5);}15%{opacity:0.5;}85%{opacity:0.2;}100%{opacity:0;transform:translateY(-100vh) scale(1.2);}}
+.page{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:3rem 2rem 7rem;}
+.fade-up{opacity:0;transform:translateY(28px);transition:opacity 0.8s ease,transform 0.8s ease;}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+
+/* Header */
+.header{text-align:center;padding:3rem 0 2rem;}
+.year-label{font-size:0.72rem;letter-spacing:0.35em;color:#6b6560;text-transform:uppercase;margin-bottom:1.2rem;}
+.main-title{font-family:'Noto Serif SC',serif;font-size:clamp(2.4rem,7vw,4rem);font-weight:900;line-height:1.15;color:#f0e8d8;margin-bottom:0.6rem;}
+.main-title .char{display:inline-block;opacity:0;transform:translateY(20px);animation:charIn 0.5s ease forwards;}
+@keyframes charIn{to{opacity:1;transform:translateY(0);}}
+.title-sub{font-size:0.9rem;color:#7a6f65;letter-spacing:0.1em;margin-bottom:2.5rem;opacity:0;animation:fadeIn 1s ease 1.4s forwards;}
+@keyframes fadeIn{to{opacity:1;}}
+.divider{width:1px;height:60px;background:linear-gradient(to bottom,transparent,#4a4540,transparent);margin:0 auto 2.5rem;opacity:0;animation:fadeIn 1s ease 1.6s forwards;}
+
+/* Music player bar */
+.music-bar{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
+  z-index:100;display:flex;align-items:center;gap:12px;
+  background:rgba(18,18,16,0.96);border:1px solid #2a2824;
+  border-radius:40px;padding:8px 18px;backdrop-filter:blur(16px);
+  transition:border-color 0.3s;min-width:260px;
+}
+.music-bar.active{border-color:#c4a88255;}
+.music-disc{width:34px;height:34px;border-radius:50%;flex-shrink:0;cursor:pointer;position:relative;overflow:hidden;background:#1a1810;}
+.music-disc img{width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0.85;}
+.music-disc::after{content:'';position:absolute;inset:32%;border-radius:50%;background:#0d0d0f;}
+.music-disc.spin{animation:spinDisc 4s linear infinite;}
+@keyframes spinDisc{to{transform:rotate(360deg);}}
+.music-info{flex:1;}
+.music-title{font-size:0.72rem;color:#c4a882;font-weight:700;white-space:nowrap;}
+.music-sub{font-size:0.62rem;color:#4a4540;white-space:nowrap;}
+.music-eq{display:flex;align-items:flex-end;gap:2px;height:16px;}
+.eq-bar{width:3px;border-radius:1px;background:#c4a882;height:3px;}
+.music-bar.active .eq-bar{animation:eqB 0.6s ease-in-out infinite alternate;}
+.music-bar.active .eq-bar:nth-child(2){animation-delay:0.1s;}
+.music-bar.active .eq-bar:nth-child(3){animation-delay:0.2s;}
+.music-bar.active .eq-bar:nth-child(4){animation-delay:0.05s;}
+@keyframes eqB{from{height:3px;}to{height:14px;}}
+.music-toggle{font-size:0.78rem;color:#6b6560;cursor:pointer;padding:4px 8px;border-radius:20px;border:1px solid #2a2824;transition:all 0.2s;background:transparent;}
+.music-toggle:hover{color:#c4a882;border-color:#4a4540;}
+
+/* Ticker */
+.ticker-wrap{overflow:hidden;margin:2rem 0;position:relative;}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;}
+.ticker-wrap::before{left:0;background:linear-gradient(to right,#0d0d0f,transparent);}
+.ticker-wrap::after{right:0;background:linear-gradient(to left,#0d0d0f,transparent);}
+.ticker-track{display:flex;white-space:nowrap;animation:tickerScroll 30s linear infinite;}
+@keyframes tickerScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;font-size:0.72rem;letter-spacing:0.12em;color:#3a3830;padding:0.5rem 0;}
+.ticker-dot{width:3px;height:3px;border-radius:50%;background:#3a3830;margin:0 1.5rem;flex-shrink:0;}
+
+/* Tickets */
+.ticket{background:#161614;border:1px solid #2a2824;border-radius:4px;display:flex;overflow:hidden;margin-bottom:1.2rem;position:relative;transition:border-color 0.3s,transform 0.3s;cursor:pointer;user-select:none;}
+.ticket:hover{border-color:#5a5248;transform:translateX(4px);}
+.ticket.speaking{border-color:#c8566b66;background:#1a1412;}
+.ticket-left{width:6px;flex-shrink:0;}
+.t-pink{background:#c8566b;}.t-amber{background:#c4883a;}.t-teal{background:#3a8c7e;}.t-purple{background:#7c5cbf;}.t-gray{background:#4a4a4a;}
+.ticket-body{flex:1;padding:1.25rem 1.5rem;display:flex;gap:1.2rem;align-items:flex-start;}
+.ticket-num{font-family:'Noto Serif SC',serif;font-size:2.2rem;font-weight:900;color:#2e2c2a;line-height:1;flex-shrink:0;width:2.5rem;padding-top:2px;transition:color 0.3s;}
+.ticket.speaking .ticket-num{color:#c8566b33;}
+.ticket-content{flex:1;}
+.ticket-tag{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:#5a5450;margin-bottom:0.4rem;}
+.ticket-title{font-family:'Noto Serif SC',serif;font-size:1.05rem;font-weight:700;color:#d4ccc0;margin-bottom:0.5rem;line-height:1.4;}
+.ticket-desc{font-size:0.82rem;color:#6b6560;line-height:1.7;}
+.ticket-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:4px;min-width:56px;}
+.ticket-badge{font-size:0.65rem;padding:3px 8px;border-radius:2px;letter-spacing:0.08em;white-space:nowrap;}
+.badge-pink{background:rgba(200,86,107,0.15);color:#c8566b;}
+.badge-amber{background:rgba(196,136,58,0.15);color:#c4883a;}
+.badge-teal{background:rgba(58,140,126,0.15);color:#3a8c7e;}
+.badge-purple{background:rgba(124,92,191,0.15);color:#7c5cbf;}
+.badge-gray{background:rgba(120,120,120,0.12);color:#888;}
+.voice-hint{font-size:0.62rem;color:#3a3830;transition:color 0.3s;letter-spacing:0.05em;}
+.ticket:hover .voice-hint{color:#6b6560;}
+.ticket.speaking .voice-hint{color:#c8566b;}
+.voice-waves{display:flex;align-items:flex-end;gap:2px;height:16px;opacity:0;transition:opacity 0.3s;}
+.ticket.speaking .voice-waves{opacity:1;}
+.vw{width:3px;border-radius:1px;background:#c8566b;}
+.ticket.speaking .vw{animation:vwD 0.5s ease-in-out infinite alternate;}
+.ticket.speaking .vw:nth-child(2){animation-delay:0.12s;}
+.ticket.speaking .vw:nth-child(3){animation-delay:0.07s;}
+.ticket.speaking .vw:nth-child(4){animation-delay:0.17s;}
+@keyframes vwD{from{height:2px;}to{height:14px;}}
+
+/* Prose / bottom */
+.prose-section{padding:2.5rem 0;border-top:1px solid #1e1c1a;border-bottom:1px solid #1e1c1a;margin:2rem 0;}
+.prose-label{font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:#4a4540;text-align:center;margin-bottom:1.5rem;}
+.prose-text{font-family:'Noto Serif SC',serif;font-size:1rem;line-height:2;color:#8a8278;text-align:center;max-width:440px;margin:0 auto;}
+.prose-text em{color:#c4a882;font-style:normal;}
+.bottom-msg{text-align:center;padding:2.5rem 0 1rem;}
+.big-line{font-family:'Noto Serif SC',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:900;color:#c4a882;margin-bottom:0.8rem;line-height:1.5;}
+.small-line{font-size:0.82rem;color:#4a4540;letter-spacing:0.08em;line-height:1.8;}
+.stamp{display:inline-block;border:2px solid #c8566b33;color:#c8566b55;font-family:'Noto Serif SC',serif;font-size:0.7rem;letter-spacing:0.2em;padding:6px 14px;border-radius:2px;transform:rotate(-3deg);margin-top:1.5rem;}
+.glimmer-line{height:1px;background:linear-gradient(to right,transparent,#c4a88244,transparent);margin:2rem 0;position:relative;overflow:hidden;}
+.glimmer-line::after{content:'';position:absolute;top:0;left:-60%;width:60%;height:100%;background:linear-gradient(to right,transparent,#c4a882cc,transparent);animation:glimmer 4s ease-in-out infinite;}
+@keyframes glimmer{from{left:-60%;}to{left:110%;}}
+
+.cinema-intro{position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 2s ease;}
+.cinema-text{color:#f5efe3;font-size:clamp(1.2rem,3vw,2rem);letter-spacing:.15em;text-align:center;opacity:0;animation:introFade 6s forwards;}
+@keyframes introFade{15%{opacity:1;}75%{opacity:1;}100%{opacity:0;}}
+.page{animation:pageReveal 3s ease;}
+@keyframes pageReveal{from{opacity:.15;filter:blur(10px);}to{opacity:1;filter:none;}}
+.video-section video{box-shadow:0 0 80px rgba(255,220,160,.12);transition:all .8s ease;}
+.video-section video:hover{transform:scale(1.02);}
+.bottom-msg{padding:5rem 0 8rem;text-align:center;}
+
+</style>
+
+<!-- Dedication -->
+<style>
+.dedication{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  text-align:center;padding:10px 20px;
+  background:linear-gradient(to right,transparent,rgba(196,168,130,0.08),transparent);
+  border-bottom:1px solid #2a2824;
+  font-family:'Noto Serif SC',serif;
+  font-size:0.78rem;letter-spacing:0.25em;color:#c4a88299;
+  pointer-events:none;
+  animation:fadeIn 2s ease 2s both;
+}
+.dedication em{color:#c4a882cc;font-style:normal;}
+</style>
+<div class="dedication">谨以此页，<em>献给龙哥</em> — 愿你心里那个孩子，永远没被生活带走</div>
+
+<div class="grain"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Hidden YouTube player -->
+<audio id="bgAudio" src="朴树_-_那些花儿.mp3" loop preload="auto"></audio>
+
+<!-- Music bar -->
+<div class="music-bar" id="musicBar">
+  <div class="music-disc" id="musicDisc">
+    <svg viewBox="0 0 34 34" style="position:absolute;inset:0;width:100%;height:100%;">
+      <circle cx="17" cy="17" r="17" fill="#2a1f10"/>
+      <circle cx="17" cy="17" r="11" fill="#1a130a"/>
+      <circle cx="17" cy="17" r="5" fill="#0d0d0f"/>
+      <path d="M8 10 Q17 5 26 10" stroke="#c4a88244" stroke-width="1" fill="none"/>
+      <path d="M6 17 Q17 12 28 17" stroke="#c4a88266" stroke-width="1" fill="none"/>
+      <path d="M8 24 Q17 19 26 24" stroke="#c4a88244" stroke-width="1" fill="none"/>
+    </svg>
+  </div>
+  <div class="music-info">
+    <div class="music-title">那些花儿</div>
+    <div class="music-sub" id="musicSub">朴树 · 点击播放</div>
+  </div>
+  <div class="music-eq">
+    <div class="eq-bar"></div><div class="eq-bar"></div>
+    <div class="eq-bar"></div><div class="eq-bar"></div>
+  </div>
+  <button class="music-toggle" id="musicToggle">▶ 播放</button>
+</div>
+
+<div class="page">
+  <div class="header fade-up">
+    <div class="year-label">六一儿童节 · 2026</div>
+    <h1 class="main-title" id="mainTitle"></h1>
+    <p class="title-sub">— 献给所有还记得的人 —</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="ticker-wrap fade-up"><div class="ticker-track" id="ticker"></div></div>
+
+  <div style="margin:2.5rem 0;" id="tcont"></div>
+
+
+  <!-- Video Section -->
+  <div class="video-section fade-up" style="margin:2rem 0;">
+    <div class="prose-label" style="font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:#4a4540;text-align:center;margin-bottom:1.2rem;">长大后的某一天</div>
+    <div style="position:relative;border-radius:4px;overflow:hidden;border:1px solid #2a2824;background:#0a0a08;">
+      <video
+        src="a1aa2b7d932022dfcc2f241dbc2fd4e8.mp4"
+        controls
+        style="width:100%;display:block;max-height:420px;object-fit:contain;"
+        preload="metadata"
+      ></video>
+    </div>
+  </div>
+
+  <div class="glimmer-line"></div>
+  <div class="prose-section fade-up">
+    <div class="prose-label">写给三十岁的你</div>
+    <p class="prose-text">
+      童年不是失去的，<br>
+      它只是被压进了某个<em>周五下班后</em>、<br>
+      某个<em>久违的午后阳光</em>里。<br><br>
+      今天，你可以不用成熟，<br>
+      哪怕只是<em>一个下午</em>。
+    </p>
+  </div>
+
+  <div class="bottom-msg fade-up">
+    <div class="big-line">后来才明白</div>
+    <div class="small-line">人生没有标准答案。<br><br>但走过的每一步，都算数。</div>
+    <div class="stamp">END CREDITS</div>
+  </div>
+</div>
+
+<script>
+// ── Tickets data ──
+const tdata = [
+  {col:'t-pink',bdg:'badge-pink',lbl:'已失效',tag:'成年人的六一',
+   title:'你今天可以假装不用工作',
+   desc:'但是手机还是会响。会议还是在日历上。打工人的六一，只有精神上的放假。',
+   speech:'你今天可以假装不用工作。但是手机还是会响，会议还是在日历上。打工人的六一，只有精神上的放假。'},
+  {col:'t-amber',bdg:'badge-amber',lbl:'未找回',tag:'童年遗失物',
+   title:'那些说"长大了就好了"的谎言',
+   desc:'好了吗？没有。只是换了一套更贵的烦恼，然后开始怀念那时候的烦恼。',
+   speech:'那些说"长大了就好了"的谎言。好了吗？没有。只是换了一套更贵的烦恼，然后开始怀念那时候的烦恼。'},
+  {col:'t-teal',bdg:'badge-teal',lbl:'绝版',tag:'珍贵库存',
+   title:'你还记得那种无聊是什么感觉吗',
+   desc:'暑假的下午，不知道干什么，躺在地上数天花板。那种奢侈的、不需要填满的空白。',
+   speech:'你还记得那种无聊是什么感觉吗？暑假的下午，不知道干什么，躺在地上数天花板。那种奢侈的，不需要填满的空白。'},
+  {col:'t-purple',bdg:'badge-purple',lbl:'已遗忘',tag:'技能丢失报告',
+   title:'你上次全力奔跑是什么时候',
+   desc:'不是赶地铁。不是追公交。是那种没有目的地、跑起来就停不下来的奔跑。',
+   speech:'你上次全力奔跑是什么时候？不是赶地铁，不是追公交。是那种没有目的地，跑起来就停不下来的奔跑。'},
+  {col:'t-gray',bdg:'badge-gray',lbl:'待统计',tag:'年度报告',
+   title:'今年你哭过几次',
+   desc:'小时候哭是因为摔跤、因为委屈。现在哭是因为累了、因为某首歌、因为说不清楚的什么。',
+   speech:'今年你哭过几次？小时候哭是因为摔跤，因为委屈。现在哭是因为累了，因为某首歌，因为说不清楚的什么。'},
+];
+
+// Build tickets
+const tcont = document.getElementById('tcont');
+tdata.forEach((t, i) => {
+  const d = document.createElement('div');
+  d.className = 'ticket fade-up';
+  d.dataset.i = i;
+  d.innerHTML = `
+    <div class="ticket-left ${t.col}"></div>
+    <div class="ticket-body">
+      <div class="ticket-num">0${i+1}</div>
+      <div class="ticket-content">
+        <div class="ticket-tag">${t.tag}</div>
+        <div class="ticket-title">${t.title}</div>
+        <div class="ticket-desc">${t.desc}</div>
+      </div>
+      <div class="ticket-right">
+        <div class="ticket-badge ${t.bdg}">${t.lbl}</div>
+        <div class="voice-waves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div>
+        <div class="voice-hint">◎ 朗读</div>
+      </div>
+    </div>`;
+  tcont.appendChild(d);
+});
+
+// ── Web Speech API ──
+let speaking = false;
+let curTicket = null;
+
+function getVoice() {
+  const voices = speechSynthesis.getVoices();
+  // Prefer Chinese male-sounding voices, lowest pitch
+  const preferred = ['Google 普通话（中国大陆）','Microsoft Yunxi','Microsoft Kangkang','zh-CN'];
+  for (const pref of preferred) {
+    const found = voices.find(v => v.name.includes(pref) || v.lang === pref);
+    if (found) return found;
+  }
+  return voices.find(v => v.lang && v.lang.startsWith('zh')) || voices[0];
+}
+
+function speakTicket(el, i) {
+  if (!('speechSynthesis' in window)) { alert('您的浏览器不支持语音朗读'); return; }
+
+  // Same ticket = stop
+  if (curTicket === el && speaking) {
+    speechSynthesis.cancel();
+    el.classList.remove('speaking');
+    el.querySelector('.voice-hint').textContent = '◎ 朗读';
+    speaking = false; curTicket = null;
+    return;
+  }
+
+  // Stop previous
+  if (speaking) {
+    speechSynthesis.cancel();
+    if (curTicket) { curTicket.classList.remove('speaking'); curTicket.querySelector('.voice-hint').textContent = '◎ 朗读'; }
+  }
+
+  const utt = new SpeechSynthesisUtterance(tdata[i].speech);
+  utt.lang = 'zh-CN';
+  utt.rate = 0.78;   // slower = more gravitas
+  utt.pitch = 0.5;   // low pitch = deeper
+  utt.volume = 1;
+
+  // Assign voice after voices load
+  const assignVoice = () => { const v = getVoice(); if (v) utt.voice = v; };
+  if (speechSynthesis.getVoices().length) assignVoice();
+  else speechSynthesis.addEventListener('voiceschanged', assignVoice, {once:true});
+
+  curTicket = el;
+  speaking = true;
+  el.classList.add('speaking');
+  el.querySelector('.voice-hint').textContent = '◉ 播放中';
+
+  utt.onend = utt.onerror = () => {
+    el.classList.remove('speaking');
+    el.querySelector('.voice-hint').textContent = '◎ 朗读';
+    speaking = false; curTicket = null;
+  };
+
+  speechSynthesis.speak(utt);
+}
+
+document.querySelectorAll('.ticket').forEach(el => {
+  el.addEventListener('click', () => speakTicket(el, +el.dataset.i));
+});
+
+// ── HTML5 Audio music ──
+const bgAudio = document.getElementById('bgAudio');
+const musicBar = document.getElementById('musicBar');
+const musicDisc = document.getElementById('musicDisc');
+const musicToggle = document.getElementById('musicToggle');
+const musicSub = document.getElementById('musicSub');
+bgAudio.volume = 0.75;
+let audioPlaying = false;
+
+function toggleMusic() {
+  if (!audioPlaying) {
+    bgAudio.play().then(() => {
+      audioPlaying = true;
+      musicBar.classList.add('active');
+      musicDisc.classList.add('spin');
+      musicToggle.textContent = '❙❙ 暂停';
+      musicSub.textContent = '朴树 · 正在播放';
+    }).catch(e => {
+      musicSub.textContent = '朴树 · 播放失败';
+      console.error(e);
+    });
+  } else {
+    bgAudio.pause();
+    audioPlaying = false;
+    musicBar.classList.remove('active');
+    musicDisc.classList.remove('spin');
+    musicToggle.textContent = '▶ 播放';
+    musicSub.textContent = '朴树 · 已暂停';
+  }
+}
+
+musicToggle.addEventListener('click', toggleMusic);
+musicDisc.addEventListener('click', toggleMusic);
+
+// ── Particles ──
+const colors = ['#c8566b','#c4883a','#3a8c7e','#7c5cbf','#c4a882'];
+const pc = document.getElementById('particles');
+for (let i = 0; i < 20; i++) {
+  const p = document.createElement('div'); p.className = 'particle';
+  const s = 2 + Math.random() * 4;
+  p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:0;background:${colors[i%5]};animation-duration:${14+Math.random()*20}s;animation-delay:${Math.random()*-20}s;`;
+  pc.appendChild(p);
+}
+
+// ── Title chars ──
+'你也曾是一个孩子'.split('').forEach((c, i) => {
+  const s = document.createElement('span'); s.className = 'char'; s.textContent = c;
+  s.style.animationDelay = (0.3 + i * 0.1) + 's';
+  document.getElementById('mainTitle').appendChild(s);
+});
+
+// ── Scroll observer ──
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.1});
+document.querySelectorAll('.fade-up').forEach((el, i) => { el.style.transitionDelay = (i * 0.07) + 's'; obs.observe(el); });
+
+// ── Ticker ──
+const mems = ['六一的糖果','暑假作业最后一天','小人书','橡皮筋','跳房子','放学路上','小卖部辣条','收音机天气预报','第一辆自行车','偷看漫画','西瓜配电风扇','同桌的橡皮','用圆规画圆','周记撒谎','那时候的夏天好像更热','从没寄出的信','坐在墙头'];
+const tr = document.getElementById('ticker');
+[...mems,...mems].forEach((m, i, a) => {
+  const s = document.createElement('span'); s.className = 'ticker-item';
+  s.innerHTML = m + (i < a.length-1 ? '<span class="ticker-dot"></span>' : '');
+  tr.appendChild(s);
+});
+</script>
+
+<script>
+setTimeout(()=>{
+ const i=document.getElementById('cinemaIntro');
+ if(i){i.style.opacity='0';setTimeout(()=>i.remove(),2000);}
+},6000);
+
+window.addEventListener('scroll',()=>{
+ document.querySelectorAll('.prose-section,.video-section,.bottom-msg').forEach(el=>{
+   const r=el.getBoundingClientRect();
+   if(r.top<window.innerHeight*0.75){el.style.transform='translateY(0)';}
+ });
+});
+</script>
